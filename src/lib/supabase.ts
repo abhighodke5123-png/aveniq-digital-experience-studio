@@ -1,16 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Production Supabase Project (pikgvqzvainywbfdlusv)
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pikgvqzvainywbfdlusv.supabase.co';
 const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpa2d2cXp2YWlueXdiZmRsdXN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MTYzMzAsImV4cCI6MjEwOTM5MjMzMH0.iBEAIKS3pEER10n70U8FpmCFzAI9IRaOCclCtZA51DY';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: false,
-  },
-});
+export const supabase = createClient(
+  SUPABASE_URL.includes('pikgvqzvainywbfdlusv') ? SUPABASE_URL : 'https://pikgvqzvainywbfdlusv.supabase.co',
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: false,
+    },
+  }
+);
 
 export interface SupabaseLeadRecord {
   full_name: string;
@@ -26,6 +31,11 @@ export interface SupabaseLeadRecord {
   source?: string;
 }
 
+/**
+ * Saves project enquiry lead to Supabase 'leads' table.
+ * Adheres strictly to anonymous RLS INSERT policy: status='New', full_name >= 2, project_description >= 15.
+ * Note: Anon role has INSERT permission without SELECT, so we do not chain .select() to prevent RLS denial.
+ */
 export async function saveLeadToSupabase(lead: SupabaseLeadRecord): Promise<{ success: boolean; error?: string }> {
   try {
     const description = lead.project_description && lead.project_description.length >= 15
