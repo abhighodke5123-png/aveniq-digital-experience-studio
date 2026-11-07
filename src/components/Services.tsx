@@ -2,56 +2,24 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Globe, Palette, TrendingUp, Bot, Server, ArrowUpRight } from 'lucide-react';
+import { Globe, Palette, TrendingUp, Bot, Server, ArrowUpRight, Sparkles } from 'lucide-react';
 import { staggerContainer, fadeInUp, viewportConfig } from '@/lib/animations';
+import { useSiteContent } from '@/context/SiteContentContext';
 import type { LucideIcon } from 'lucide-react';
+import type { ServiceDetail } from '@/types';
 
-interface Service {
-  number: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}
-
-const services: Service[] = [
-  {
-    number: '01',
-    title: 'Digital Experiences',
-    description:
-      'Custom websites, landing pages, e-commerce, booking platforms and web applications.',
-    icon: Globe,
-  },
-  {
-    number: '02',
-    title: 'Brand & Creative',
-    description:
-      'Brand identity, visual design, UI/UX and digital brand experiences.',
-    icon: Palette,
-  },
-  {
-    number: '03',
-    title: 'Search & Growth',
-    description:
-      'SEO, local SEO, conversion optimisation, analytics and content strategy.',
-    icon: TrendingUp,
-  },
-  {
-    number: '04',
-    title: 'AI & Automation',
-    description:
-      'AI-powered chat interfaces, lead management, appointment workflows and business automation.',
-    icon: Bot,
-  },
-  {
-    number: '05',
-    title: 'Digital Infrastructure',
-    description:
-      'Hosting, website maintenance, security, performance and integrations.',
-    icon: Server,
-  },
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  '01': Globe,
+  '02': Palette,
+  '03': TrendingUp,
+  '04': Bot,
+  '05': Server,
+};
 
 export default function Services() {
+  const { content } = useSiteContent();
+  const services = content.services || [];
+
   return (
     <section id="services" className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -81,7 +49,7 @@ export default function Services() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-0"
           >
             {services.map((service) => (
-              <ServiceCard key={service.number} service={service} />
+              <ServiceCard key={service.number || service.id} service={service} />
             ))}
           </motion.div>
         </motion.div>
@@ -90,8 +58,8 @@ export default function Services() {
   );
 }
 
-function ServiceCard({ service }: { service: Service }) {
-  const Icon = service.icon;
+function ServiceCard({ service }: { service: ServiceDetail }) {
+  const Icon = ICON_MAP[service.number] || Sparkles;
 
   return (
     <Link

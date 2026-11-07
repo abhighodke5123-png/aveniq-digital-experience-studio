@@ -8,6 +8,7 @@ const navLinks = [
   { label: 'About Studio', href: '/about' },
   { label: 'Contact & Scoping', href: '/contact' },
   { label: 'Client Portal', href: '/portal' },
+  { label: 'Super Admin', href: '/admin' },
   { label: 'Privacy Policy', href: '#' },
 ];
 
