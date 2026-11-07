@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, fadeInUp, viewportConfig } from '@/lib/animations';
+import { sound } from '@/lib/sound-fx';
 
 interface Project {
   title: string;
@@ -20,6 +22,7 @@ const projects: Project[] = [
     accent: '#91A99B',
     preview: (
       <div className="w-full h-full p-4 flex flex-col justify-between bg-[#131518] text-white font-mono text-[11px]">
+        {/* Top bar */}
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-white/30" />
@@ -29,6 +32,7 @@ const projects: Project[] = [
           <span className="text-[10px] tracking-widest text-[#91A99B] uppercase">aurahealth.org</span>
           <span className="text-[10px] text-white/40">24/7 Care</span>
         </div>
+        {/* Mock content */}
         <div className="my-auto space-y-3 py-4">
           <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#91A99B]/20 text-[#91A99B]">
             Tertiary Care & Research
@@ -51,6 +55,7 @@ const projects: Project[] = [
             </div>
           </div>
         </div>
+        {/* Bottom indicator */}
         <div className="flex items-center justify-between text-[10px] text-white/40 pt-2 border-t border-white/10">
           <span>Responsive Web Application</span>
           <span>Telehealth Ready</span>
@@ -75,123 +80,118 @@ const projects: Project[] = [
           <span className="text-[10px] text-[#91A99B] font-semibold">Open Consultation</span>
         </div>
         <div className="my-auto space-y-3 py-4">
-          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#17191D]/5 text-[#17191D]">
-            Aesthetic & Restorative Dentistry
+          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#91A99B]/20 text-[#17191D]">
+            Cosmetic & Family Dentistry
           </div>
           <h4 className="font-heading text-lg font-medium text-[#17191D] leading-tight">
-            A serene, anxiety-free digital patient experience.
+            Anxiety-free clinical environments with transparent digital pricing.
           </h4>
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex-1 border border-[#17191D]/10 p-2 bg-white/60 rounded">
-              <p className="text-[9px] text-[#777873]">Smile Design</p>
-              <p className="text-xs font-medium text-[#17191D] mt-0.5">3D Scanning Workflow</p>
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#17191D]/10">
+            <div className="bg-white/70 p-2 rounded">
+              <p className="text-[9px] text-[#777873]">Smile Quiz</p>
+              <p className="text-xs font-semibold text-[#17191D] mt-0.5">2-Min Assessment</p>
             </div>
-            <div className="flex-1 border border-[#17191D]/10 p-2 bg-white/60 rounded">
-              <p className="text-[9px] text-[#777873]">WhatsApp Booking</p>
-              <p className="text-xs font-medium text-[#91A99B] mt-0.5">Direct Specialist Chat</p>
+            <div className="bg-white/70 p-2 rounded">
+              <p className="text-[9px] text-[#777873]">Reviews</p>
+              <p className="text-xs font-semibold text-[#91A99B] mt-0.5">4.9 ★ (600+)</p>
+            </div>
+            <div className="bg-white/70 p-2 rounded">
+              <p className="text-[9px] text-[#777873]">Tech</p>
+              <p className="text-xs font-semibold text-[#17191D] mt-0.5">3D Intraoral Scan</p>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px] text-[#777873] pt-2 border-t border-[#17191D]/10">
-          <span>Google Local 4.9★ Integration</span>
-          <span>Zero-friction Form</span>
+          <span>Speed-optimized Booking</span>
+          <span>Google Map Pack #1</span>
         </div>
       </div>
     ),
   },
   {
-    title: 'The Monolith — Luxury Boutique Hotel',
-    industry: 'Hospitality',
-    services: 'Visual Identity, Direct Booking Engine, Editorial Content',
-    accent: '#B09B88',
+    title: 'Dr. Vane & Partners — Orthopaedic Associates',
+    industry: 'Healthcare',
+    services: 'Patient Education Architecture, Surgeon Profiles, HIPAA-Compliant Forms',
+    accent: '#8FA697',
     preview: (
-      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#191817] text-white font-mono text-[11px]">
+      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#15181C] text-white font-mono text-[11px]">
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-white/30" />
             <span className="w-2 h-2 rounded-full bg-white/20" />
             <span className="w-2 h-2 rounded-full bg-white/20" />
           </div>
-          <span className="text-[10px] tracking-widest text-[#B09B88] uppercase">themonolith-retreat.com</span>
-          <span className="text-[10px] text-white/40">Suites & Spa</span>
+          <span className="text-[10px] tracking-widest text-[#8FA697] uppercase">vaneortho.com</span>
+          <span className="text-[10px] text-white/40">Joint Restoration</span>
         </div>
         <div className="my-auto space-y-3 py-4">
-          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#B09B88]/20 text-[#B09B88]">
-            Architectural Sanctuaries
+          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#8FA697]/20 text-[#8FA697]">
+            Orthopaedic & Sports Medicine
           </div>
           <h4 className="font-heading text-lg font-medium text-white leading-tight">
-            Immersive editorial design driving higher direct reservations.
+            Empowering active recovery through clear procedure pathways.
           </h4>
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
             <div className="bg-white/5 p-2 rounded">
-              <span className="text-[9px] text-white/50">Direct Booking</span>
-              <p className="text-xs font-semibold text-white mt-0.5">No Commission Fees</p>
+              <p className="text-[9px] text-white/50">Procedure Library</p>
+              <p className="text-xs font-medium text-white mt-0.5">3D Interactive Anatomy</p>
             </div>
             <div className="bg-white/5 p-2 rounded">
-              <span className="text-[9px] text-white/50">Virtual Room Tour</span>
-              <p className="text-xs font-semibold text-[#B09B88] mt-0.5">360° Visual Engine</p>
+              <p className="text-[9px] text-white/50">Triage Intake</p>
+              <p className="text-xs font-medium text-[#8FA697] mt-0.5">Automated MRI Triage</p>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px] text-white/40 pt-2 border-t border-white/10">
-          <span>Multi-Currency Engine</span>
-          <span>Hospitality UX</span>
+          <span>Sub-second Load Times</span>
+          <span>Accessible WCAG AAA</span>
         </div>
       </div>
     ),
   },
   {
-    title: 'Verve Residences — Premium Property Developer',
-    industry: 'Real Estate',
-    services: 'Strategic Positioning, 3D Interactive Floorplans, Lead Capture',
-    accent: '#8C9B90',
+    title: 'Verve Studio — Architecture & Interiors',
+    industry: 'Architecture',
+    services: 'Editorial Web Design, Visual Direction, Content Infrastructure',
+    accent: '#91A99B',
     preview: (
-      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#0E1311] text-white font-mono text-[11px]">
+      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#17191D] text-white font-mono text-[11px]">
         <div className="flex items-center justify-between border-b border-white/10 pb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-white/30" />
             <span className="w-2 h-2 rounded-full bg-white/20" />
             <span className="w-2 h-2 rounded-full bg-white/20" />
           </div>
-          <span className="text-[10px] tracking-widest text-[#8C9B90] uppercase">ververesidences.in</span>
-          <span className="text-[10px] text-white/40">Prime Real Estate</span>
+          <span className="text-[10px] tracking-widest text-[#91A99B] uppercase">vervestudio.arch</span>
+          <span className="text-[10px] text-white/40">Index 2026</span>
         </div>
         <div className="my-auto space-y-3 py-4">
-          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#8C9B90]/20 text-[#8C9B90]">
-            Ultra-Luxury Urban Living
+          <div className="inline-block px-2 py-0.5 rounded text-[9px] tracking-wider uppercase bg-[#91A99B]/20 text-[#91A99B]">
+            Spatial Monographs
           </div>
           <h4 className="font-heading text-lg font-medium text-white leading-tight">
-            Showcasing prime spaces with speed, clarity and high conversion.
+            Minimalist spatial showcase capturing materiality, light, and context.
           </h4>
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
-            <div className="bg-white/5 p-2 rounded">
-              <span className="text-[9px] text-white/50">Units</span>
-              <p className="text-xs font-semibold text-white mt-0.5">3 & 4 BHK Skyvillas</p>
-            </div>
-            <div className="bg-white/5 p-2 rounded">
-              <span className="text-[9px] text-white/50">Brochure</span>
-              <p className="text-xs font-semibold text-[#8C9B90] mt-0.5">Instant WhatsApp</p>
-            </div>
-            <div className="bg-white/5 p-2 rounded">
-              <span className="text-[9px] text-white/50">Location</span>
-              <p className="text-xs font-semibold text-white mt-0.5">Interactive Map</p>
-            </div>
+          <div className="flex items-center gap-3 pt-2 text-[10px] text-white/60">
+            <span className="border-b border-[#91A99B] pb-0.5 text-white">Residential (24)</span>
+            <span>Commercial (12)</span>
+            <span>Civic (6)</span>
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px] text-white/40 pt-2 border-t border-white/10">
-          <span>High-intent Buyer Funnel</span>
-          <span>CRM Auto-sync</span>
+          <span>Headless Sanity CMS</span>
+          <span>Adaptive Image Pipeline</span>
         </div>
       </div>
     ),
   },
   {
-    title: 'Atelier Table — Contemporary Restaurant',
+    title: 'L’Atelier Table — Fine Dining Experience',
     industry: 'Hospitality',
-    services: 'Brand Identity, Digital Menu, Reservation Engine, SEO',
+    services: 'Sensory Web Design, Interactive Tasting Menu, Reservation Flow',
     accent: '#91A99B',
     preview: (
-      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#F4F3EE] text-[#17191D] font-mono text-[11px]">
+      <div className="w-full h-full p-4 flex flex-col justify-between bg-[#F4F1EA] text-[#17191D] font-mono text-[11px]">
         <div className="flex items-center justify-between border-b border-[#17191D]/10 pb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#17191D]/30" />
@@ -274,6 +274,20 @@ const projects: Project[] = [
 ];
 
 export default function Work() {
+  const [filter, setFilter] = useState<string>('all');
+
+  const filteredProjects = projects.filter((p) => {
+    if (filter === 'all') return true;
+    return p.industry.toLowerCase() === filter.toLowerCase();
+  });
+
+  const categories = [
+    { id: 'all', label: 'All Projects', count: projects.length },
+    { id: 'healthcare', label: 'Healthcare & Clinical', count: projects.filter((p) => p.industry === 'Healthcare').length },
+    { id: 'technology', label: 'Technology & SaaS', count: projects.filter((p) => p.industry === 'Technology').length },
+    { id: 'hospitality', label: 'Hospitality', count: projects.filter((p) => p.industry === 'Hospitality').length },
+  ];
+
   return (
     <section id="work" className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -290,80 +304,105 @@ export default function Work() {
             Selected Work
           </motion.p>
 
-          <motion.h2
-            variants={fadeInUp}
-            className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium mt-4 mb-16 lg:mb-20 leading-tight"
-          >
-            Digital experiences, thoughtfully created.
-          </motion.h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <motion.h2
+              variants={fadeInUp}
+              className="font-heading text-3xl md:text-4xl lg:text-5xl font-medium leading-tight max-w-2xl"
+            >
+              Digital experiences, thoughtfully created.
+            </motion.h2>
+
+            {/* Interactive Category Filter Pills */}
+            <motion.div
+              variants={fadeInUp}
+              className="flex flex-wrap items-center gap-2"
+              role="tablist"
+              aria-label="Filter projects by industry"
+            >
+              {categories.map((cat) => {
+                const isActive = filter === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => {
+                      sound.playClick();
+                      setFilter(cat.id);
+                    }}
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-foreground text-background font-semibold shadow-xs'
+                        : 'bg-foreground/[0.04] text-secondary hover:text-foreground hover:bg-foreground/[0.08]'
+                    }`}
+                  >
+                    <span>{cat.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                        isActive ? 'bg-background/20 text-background' : 'bg-foreground/10 text-secondary'
+                      }`}
+                    >
+                      {cat.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </motion.div>
+          </div>
         </motion.div>
 
         <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportConfig}
+          layout
           className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14"
         >
-          {projects.map((project) => (
-            <Link
-              key={project.title}
-              href="/work"
-              className="group block cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-            >
-              <motion.div variants={fadeInUp}>
-                <div className="relative overflow-hidden border border-border bg-[#F7F6F2] aspect-[16/10] shadow-sm transition-all duration-300 group-hover:border-accent group-hover:shadow-md">
-                  <div className="w-full h-full transition-transform duration-500 group-hover:scale-[1.015]">
-                    {project.preview}
+          <AnimatePresence>
+            {filteredProjects.map((project) => (
+              <motion.div
+                key={project.title}
+                layout
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Link
+                  href="/work"
+                  className="group block cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+                >
+                  {/* Visual Mockup Container */}
+                  <div className="relative overflow-hidden border border-border bg-[#F7F6F2] aspect-[16/10] shadow-sm transition-all duration-300 group-hover:border-accent group-hover:shadow-md">
+                    <div className="w-full h-full transition-transform duration-500 group-hover:scale-[1.015]">
+                      {project.preview}
+                    </div>
+                    {/* View Project interactive pill */}
+                    <div className="absolute inset-0 flex items-end justify-end p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-t from-black/40 via-transparent to-transparent">
+                      <span className="text-xs font-medium tracking-wider uppercase text-foreground bg-background px-4 py-2 border border-border shadow-sm flex items-center gap-1">
+                        Inspect Architecture ↗
+                      </span>
+                    </div>
                   </div>
-                  <div className="absolute inset-0 flex items-end justify-end p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-t from-black/40 via-transparent to-transparent">
-                    <span className="text-xs font-medium tracking-wider uppercase text-foreground bg-background px-4 py-2 border border-border shadow-sm flex items-center gap-1">
-                      Inspect Architecture ↗
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs uppercase tracking-wider text-secondary font-medium">
-                      {project.industry}
+                  {/* Meta */}
+                  <div className="mt-5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs uppercase tracking-wider text-secondary font-medium">
+                        {project.industry}
+                      </p>
+                      <span className="text-xs text-accent font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        View full case study ↗
+                      </span>
+                    </div>
+                    <h3 className="font-heading text-lg font-medium text-foreground mt-1 group-hover:text-accent transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-sm text-secondary mt-1">
+                      {project.services}
                     </p>
-                    <span className="text-xs text-accent font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      View full case study ↗
-                    </span>
                   </div>
-                  <h3 className="font-heading text-lg font-medium text-foreground mt-1 group-hover:text-accent transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-secondary mt-1">
-                    {project.services}
-                  </p>
-                </div>
+                </Link>
               </motion.div>
-            </Link>
-          ))}
-        </motion.div>
-
-        <div className="mt-12 text-center">
-          <Link
-            href="/work"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-foreground text-background text-xs font-medium uppercase tracking-wider hover:bg-accent transition-colors shadow-xs"
-          >
-            <span>Explore All Work Blueprints in Archive</span>
-            <span>↗</span>
-          </Link>
-        </div>
-
-        <motion.div
-          variants={fadeInUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportConfig}
-          className="border-t border-border mt-16 pt-8 text-center"
-        >
-          <p className="text-xs text-secondary italic">
-            IMPORTANT: These are AVENIQ Concept Projects showcasing our design approach and technology capabilities across diverse sectors.
-          </p>
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
     </section>

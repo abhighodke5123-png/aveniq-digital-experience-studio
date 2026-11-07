@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut, ArrowUpRight } from 'lucide-react';
+import { Menu, X, User, LogOut, ArrowUpRight, Volume2, VolumeX } from 'lucide-react';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { sound } from '@/lib/sound-fx';
 
 interface NavItem {
   label: string;
@@ -29,6 +30,16 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { user, isLoading } = useUser();
+  const [soundActive, setSoundActive] = useState(false);
+
+  useEffect(() => {
+    setSoundActive(sound.isEnabled());
+  }, []);
+
+  const handleToggleSound = () => {
+    const nextState = sound.toggle();
+    setSoundActive(nextState);
+  };
 
   // Track scroll for background transition
   useEffect(() => {
@@ -79,26 +90,22 @@ export default function Navigation() {
           >
             <path
               d="M16 3L4 28h5.5l2.8-6h7.4l2.8 6H28L16 3Z"
-              fill={isDarkPage ? '#F7F6F2' : 'currentColor'}
-              className={isDarkPage ? '' : 'text-foreground'}
+              fill={isDarkPage ? '#F7F6F2' : '#17191D'}
             />
-            <path
-              d="M16 12l-3.2 7h6.4L16 12Z"
-              fill="#91A99B"
-            />
+            <path d="M16 12l-3.2 7h6.4L16 12Z" fill="#91A99B" />
           </svg>
-          <div className="flex flex-col">
-            <span
-              className={`font-heading text-lg font-bold tracking-tight md:text-xl transition-colors ${
-                isDarkPage ? 'text-white' : 'text-foreground'
-              }`}
-            >
-              AVENIQ
-            </span>
-          </div>
+
+          {/* Lettermark */}
+          <span
+            className={`font-heading text-xl font-bold tracking-tight transition-colors ${
+              isDarkPage ? 'text-[#F7F6F2]' : 'text-foreground'
+            }`}
+          >
+            AVENIQ
+          </span>
         </Link>
 
-        {/* ── Desktop links ── */}
+        {/* ── Desktop nav list ── */}
         <ul className="hidden items-center gap-1 lg:flex" role="list">
           {NAV_LINKS.map(({ label, href, badge }) => {
             const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
@@ -108,13 +115,13 @@ export default function Navigation() {
                 <Link
                   href={href}
                   className={`relative flex items-center gap-1.5 px-3.5 py-2 font-body text-sm transition-colors duration-200 focus-visible:outline-accent ${
-                    isDarkPage
-                      ? isActive
+                    isActive
+                      ? isDarkPage
                         ? 'text-white font-medium'
-                        : 'text-white/60 hover:text-white'
-                      : isActive
-                        ? 'text-foreground font-medium'
-                        : 'text-secondary hover:text-foreground'
+                        : 'text-foreground font-medium'
+                      : isDarkPage
+                      ? 'text-white/60 hover:text-white'
+                      : 'text-secondary hover:text-foreground'
                   }`}
                 >
                   <span>{label}</span>
@@ -137,7 +144,26 @@ export default function Navigation() {
         </ul>
 
         {/* ── Desktop CTA + Auth + mobile toggle ── */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Tactile Sound FX Toggle */}
+          <button
+            onClick={handleToggleSound}
+            title={soundActive ? 'Tactile Sound FX: Enabled' : 'Tactile Sound FX: Disabled'}
+            aria-label={soundActive ? 'Mute sound effects' : 'Enable tactile sound effects'}
+            className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-mono transition-colors border cursor-pointer ${
+              soundActive
+                ? 'bg-accent/20 border-accent/40 text-accent font-semibold'
+                : isDarkPage
+                ? 'border-white/10 text-white/50 hover:text-white hover:border-white/20'
+                : 'border-border text-secondary hover:text-foreground hover:border-foreground/20'
+            }`}
+          >
+            {soundActive ? <Volume2 size={13} /> : <VolumeX size={13} />}
+            <span className="text-[10px] tracking-wider uppercase">
+              {soundActive ? 'Audio ON' : 'Audio'}
+            </span>
+          </button>
+
           {/* Auth0 Login / Portal status */}
           {!isLoading && (
             user ? (
@@ -277,41 +303,32 @@ export default function Navigation() {
                 })}
               </ul>
 
-              <div className="mt-auto border-t border-border pt-6 pb-8 space-y-3">
-                {user ? (
-                  <div className="space-y-2">
-                    <Link
-                      href="/portal"
-                      onClick={closeMobile}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground bg-accent/10"
-                    >
-                      <User size={16} className="text-accent" />
-                      <span>Client Portal ({user.name?.split(' ')[0]})</span>
-                    </Link>
-                    <a
-                      href="/auth/logout"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-secondary hover:text-foreground"
-                    >
-                      <LogOut size={16} />
-                      <span>Sign Out</span>
-                    </a>
-                  </div>
-                ) : (
-                  <a
-                    href="/auth/login"
-                    className="block text-center rounded-lg border border-border py-2.5 text-sm font-medium text-foreground hover:border-accent transition-colors"
-                  >
-                    Client Sign In
-                  </a>
-                )}
-
+              <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
                 <Link
                   href="/contact"
                   onClick={closeMobile}
-                  className="block rounded-full bg-foreground py-3.5 text-center font-body text-sm font-medium text-background transition-colors duration-200 hover:bg-accent focus-visible:outline-accent"
+                  className="w-full text-center bg-foreground text-background py-3.5 text-sm font-medium rounded-full hover:bg-accent transition-colors"
                 >
                   Start a Project ↗
                 </Link>
+
+                {!isLoading && (
+                  user ? (
+                    <div className="flex items-center justify-between px-2 pt-2">
+                      <span className="text-xs text-secondary truncate">{user.email}</span>
+                      <a href="/auth/logout" className="text-xs text-rose-500 font-medium">
+                        Log out
+                      </a>
+                    </div>
+                  ) : (
+                    <a
+                      href="/auth/login"
+                      className="text-center text-xs font-mono uppercase tracking-wider text-secondary py-2 border border-border rounded-full hover:text-foreground"
+                    >
+                      Client Portal Login
+                    </a>
+                  )
+                )}
               </div>
             </motion.div>
           </>
