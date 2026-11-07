@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { isAuthenticatedAdmin } from '@/lib/admin-auth';
+import { checkAdminAuth } from '@/lib/admin-auth';
 
 export async function GET() {
   try {
-    const isAuth = await isAuthenticatedAdmin();
-    if (!isAuth) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const authResult = await checkAdminAuth();
+    if (!authResult.authenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: authResult.code || 'UNAUTHORIZED',
+          error: authResult.reason || 'Unauthorized. Super Admin login required.',
+        },
+        { status: 401 }
+      );
     }
 
     const { data, error } = await supabase
@@ -28,9 +35,16 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    const isAuth = await isAuthenticatedAdmin();
-    if (!isAuth) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const authResult = await checkAdminAuth();
+    if (!authResult.authenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: authResult.code || 'UNAUTHORIZED',
+          error: authResult.reason || 'Unauthorized. Super Admin login required.',
+        },
+        { status: 401 }
+      );
     }
 
     const { id, status } = await req.json();

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { initialWebsiteContent } from '@/data/initial-content';
 import { supabase } from '@/lib/supabase';
-import { isAuthenticatedAdmin } from '@/lib/admin-auth';
+import { checkAdminAuth } from '@/lib/admin-auth';
 import type { WebsiteContent } from '@/types/content';
 
 // In-memory runtime cache for high-speed edge delivery
@@ -41,10 +41,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const isAuth = await isAuthenticatedAdmin();
-    if (!isAuth) {
+    const authResult = await checkAdminAuth();
+    if (!authResult.authenticated) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized. Super Admin login required.' },
+        {
+          success: false,
+          code: authResult.code || 'UNAUTHORIZED',
+          error: authResult.reason || 'Unauthorized. Super Admin login required.',
+        },
         { status: 401 }
       );
     }

@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
-import { isAuthenticatedAdmin, SUPER_ADMIN_USERNAME } from '@/lib/admin-auth';
+import { checkAdminAuth, SUPER_ADMIN_USERNAME } from '@/lib/admin-auth';
 
 export async function GET() {
-  const isAuth = await isAuthenticatedAdmin();
+  const authResult = await checkAdminAuth();
 
-  if (!isAuth) {
+  if (!authResult.authenticated) {
     return NextResponse.json(
-      { authenticated: false },
+      {
+        authenticated: false,
+        code: authResult.code || 'UNAUTHORIZED',
+        error: authResult.reason || 'Super Admin authorization required.',
+      },
       { status: 401 }
     );
   }
@@ -17,5 +21,6 @@ export async function GET() {
       username: SUPER_ADMIN_USERNAME,
       role: 'Super Administrator',
     },
+    activeDevice: authResult.activeDevice,
   });
 }

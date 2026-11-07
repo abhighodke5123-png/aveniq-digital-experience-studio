@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, type FormEvent } from 'react';
+import { useState, Suspense, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -9,18 +9,16 @@ import Footer from '@/components/Footer';
 import {
   MessageCircle,
   Mail,
-  Clock,
   ShieldCheck,
   CheckCircle2,
   Loader2,
   ChevronDown,
   ArrowRight,
   HelpCircle,
-  Sparkles,
   Copy,
   Check,
 } from 'lucide-react';
-import { fadeInUp, staggerContainer, viewportConfig } from '@/lib/animations';
+import { staggerContainer } from '@/lib/animations';
 import { clientFaqs } from '@/data/catalog';
 import { FaqJsonLd } from '@/components/JsonLd';
 
@@ -54,38 +52,46 @@ function ContactFormInner() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<FormStatus>('idle');
   const [emailError, setEmailError] = useState('');
-  const [selectedService, setSelectedService] = useState('Hospital Website');
-  const [selectedBudget, setSelectedBudget] = useState('$15,000 — $35,000');
-  const [selectedTimeline, setSelectedTimeline] = useState('Standard (6 — 8 Weeks)');
-  const [description, setDescription] = useState('');
+
+  const initialService = (() => {
+    const sParam = searchParams.get('service');
+    if (!sParam) return 'Hospital Website';
+    const match = SERVICE_OPTIONS.find((s) =>
+      s.toLowerCase().includes(sParam.toLowerCase()) || sParam.toLowerCase().includes(s.toLowerCase())
+    );
+    return match || 'Hospital Website';
+  })();
+
+  const initialBudget = (() => {
+    const bParam = searchParams.get('budget');
+    if (!bParam) return '$15,000 — $35,000';
+    const bMatch = BUDGET_TIERS.find((b) => bParam.includes(b.split('—')[0].trim()));
+    return bMatch || '$15,000 — $35,000';
+  })();
+
+  const initialTimeline = (() => {
+    const tParam = searchParams.get('timeline');
+    if (!tParam) return 'Standard (6 — 8 Weeks)';
+    const tMatch = TIMELINE_OPTIONS.find((t) => t.toLowerCase().includes(tParam.toLowerCase()));
+    return tMatch || 'Standard (6 — 8 Weeks)';
+  })();
+
+  const initialDescription = (() => {
+    const concept = searchParams.get('scopeConcept') || searchParams.get('projectRef');
+    const modules = searchParams.get('selectedModules');
+    if (concept) return `Inquiry regarding ${concept} architectural blueprint.`;
+    if (modules) return `Selected modules: ${modules.split(',').join(', ')}.`;
+    return '';
+  })();
+
+  const [selectedService, setSelectedService] = useState(initialService);
+  const [selectedBudget, setSelectedBudget] = useState(initialBudget);
+  const [selectedTimeline, setSelectedTimeline] = useState(initialTimeline);
+  const [description, setDescription] = useState(initialDescription);
   const [submittedName, setSubmittedName] = useState('');
   const [enquiryId, setEnquiryId] = useState('');
   const [serverError, setServerError] = useState('');
   const [copiedId, setCopiedId] = useState(false);
-
-  useEffect(() => {
-    const sParam = searchParams.get('service');
-    if (sParam) {
-      const match = SERVICE_OPTIONS.find((s) =>
-        s.toLowerCase().includes(sParam.toLowerCase()) || sParam.toLowerCase().includes(s.toLowerCase())
-      );
-      if (match) setSelectedService(match);
-    }
-
-    const bParam = searchParams.get('budget');
-    if (bParam) {
-      const bMatch = BUDGET_TIERS.find((b) => bParam.includes(b.split('—')[0].trim()));
-      if (bMatch) setSelectedBudget(bMatch);
-    }
-
-    const concept = searchParams.get('scopeConcept') || searchParams.get('projectRef');
-    const modules = searchParams.get('selectedModules');
-    if (concept) {
-      setDescription(`Inquiry regarding ${concept} architectural blueprint.`);
-    } else if (modules) {
-      setDescription(`Selected modules: ${modules.split(',').join(', ')}.`);
-    }
-  }, [searchParams]);
 
   function validateEmail(email: string) {
     if (!email) return 'Email is required.';
@@ -298,10 +304,36 @@ function ContactFormInner() {
             </div>
           </div>
 
+          {/* Timeline Selector */}
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-secondary mb-3">
+              3. Target Delivery Horizon
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {TIMELINE_OPTIONS.map((horizon) => {
+                const active = selectedTimeline === horizon;
+                return (
+                  <button
+                    type="button"
+                    key={horizon}
+                    onClick={() => setSelectedTimeline(horizon)}
+                    className={`p-3 text-xs text-center border transition-all cursor-pointer ${
+                      active
+                        ? 'border-accent bg-accent/10 text-foreground font-semibold'
+                        : 'border-border bg-background/50 text-secondary hover:border-foreground/40'
+                    }`}
+                  >
+                    {horizon}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Contact Inputs */}
           <div className="space-y-6 pt-4 border-t border-border">
             <span className="block text-xs font-mono uppercase tracking-wider text-secondary">
-              3. Organization & Contact Details
+              4. Organization & Contact Details
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -359,7 +391,7 @@ function ContactFormInner() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 9226638440"
                   className="w-full border border-border bg-background px-4 py-3.5 text-sm text-foreground placeholder:text-secondary/50 outline-none focus:border-accent"
                 />
               </div>
@@ -468,15 +500,23 @@ export default function ContactPage() {
                 <p className="text-xs text-secondary mt-2 leading-relaxed">
                   Prefer direct instant messaging? Reach out directly on our studio WhatsApp channel for urgent timelines.
                 </p>
-                <a
-                  href="https://wa.me/91XXXXXXXXXX?text=Hello%20AVENIQ%20Studio%2C%20I%20would%20like%20to%20discuss%20a%20digital%20project."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-foreground hover:text-accent transition-colors"
-                >
-                  <span>Chat on WhatsApp</span>
-                  <ArrowRight size={14} />
-                </a>
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-border">
+                  <a
+                    href="https://wa.me/919226638440?text=Hello%20AVENIQ%20Studio%2C%20I%20would%20like%20to%20discuss%20a%20digital%20project."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-foreground hover:text-accent transition-colors"
+                  >
+                    <span>Chat on WhatsApp</span>
+                    <ArrowRight size={14} />
+                  </a>
+                  <a
+                    href="tel:+919226638440"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-secondary hover:text-accent transition-colors"
+                  >
+                    <span>Call: +91 9226638440</span>
+                  </a>
+                </div>
               </div>
 
               {/* Direct Email Card */}
