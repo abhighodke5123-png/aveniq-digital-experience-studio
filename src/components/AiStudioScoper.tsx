@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, Loader2, ArrowRight, Layers, CheckCircle2, Cpu } from 'lucide-react';
+import { Sparkles, Loader2, ArrowRight, Layers, CheckCircle2, Cpu, Copy, Check } from 'lucide-react';
 import type { ScopingAnalysis } from '@/lib/gemini';
 
 export default function AiStudioScoper() {
@@ -12,6 +12,27 @@ export default function AiStudioScoper() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<ScopingAnalysis | null>(null);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyBlueprint() {
+    if (!analysis) return;
+    const text = `AVENIQ AI Blueprint: ${analysis.projectTitle}
+Scope Complexity: ${analysis.complexityTier}
+Sprint Estimate: ~${analysis.estimatedTimelineWeeks} Weeks (${analysis.estimatedBudgetBracket})
+
+Strategic Insights:
+${analysis.strategicInsights}
+
+Recommended Architecture:
+${analysis.recommendedArchitecture.join(', ')}
+
+Key Deliverables:
+${analysis.keyDeliverables.map((d) => `• ${d}`).join('\n')}
+`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
 
   async function handleAnalyze() {
     if (!brief.trim() || brief.trim().length < 8) {
@@ -191,13 +212,33 @@ export default function AiStudioScoper() {
                   </span>
                 </div>
 
-                <Link
-                  href={`/contact?scopeConcept=${encodeURIComponent(analysis.projectTitle)}`}
-                  className="px-6 py-3 bg-foreground text-background text-xs font-medium uppercase tracking-wider hover:bg-accent transition-colors inline-flex items-center gap-2"
-                >
-                  <span>Commission This Scope</span>
-                  <ArrowRight size={13} />
-                </Link>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopyBlueprint}
+                    className="px-4 py-3 border border-border bg-white text-xs font-mono uppercase tracking-wider text-foreground hover:border-accent transition-colors inline-flex items-center gap-2 cursor-pointer"
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={14} className="text-accent" />
+                        <span>Copied Blueprint!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} className="text-secondary" />
+                        <span>Copy Blueprint</span>
+                      </>
+                    )}
+                  </button>
+
+                  <Link
+                    href={`/contact?service=${encodeURIComponent(selectedService.split('&')[0].trim())}&scopeConcept=${encodeURIComponent(analysis.projectTitle)}&budget=${encodeURIComponent(analysis.estimatedBudgetBracket)}&timeline=${encodeURIComponent(`${analysis.estimatedTimelineWeeks} Weeks`)}`}
+                    className="px-6 py-3 bg-foreground text-background text-xs font-medium uppercase tracking-wider hover:bg-accent transition-colors inline-flex items-center gap-2"
+                  >
+                    <span>Commission This Scope</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
               </div>
             </motion.div>
           )}
