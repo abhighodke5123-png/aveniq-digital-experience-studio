@@ -68,6 +68,14 @@ export default function SuperAdminPortal() {
   const [leads, setLeads] = useState<LeadRecord[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
+  // Active exclusive device metadata
+  const [activeDevice, setActiveDevice] = useState<{
+    deviceName?: string;
+    ipAddress?: string;
+    createdAt?: string;
+    lastActiveAt?: string;
+  } | null>(null);
+
   // Sync content into formData when context finishes loading or changes
   useEffect(() => {
     if (content) {
@@ -75,21 +83,35 @@ export default function SuperAdminPortal() {
     }
   }, [content]);
 
-  // Check super admin session
+  // Check super admin session with real-time single-device enforcement
   useEffect(() => {
     async function verifyAuth() {
       try {
         const res = await fetch('/api/admin/auth/session');
+        const data = await res.json().catch(() => null);
+
         if (!res.ok) {
-          router.push('/admin/login');
+          if (data?.code === 'SESSION_TERMINATED') {
+            router.push('/admin/login?reason=terminated');
+          } else {
+            router.push('/admin/login');
+          }
         } else {
           setAuthChecked(true);
+          if (data?.activeDevice) {
+            setActiveDevice(data.activeDevice);
+          }
         }
       } catch {
         router.push('/admin/login');
       }
     }
+
     verifyAuth();
+
+    // Heartbeat every 20s to ensure instant rejection if another device registers
+    const interval = setInterval(verifyAuth, 20000);
+    return () => clearInterval(interval);
   }, [router]);
 
   // Load leads when clicking CRM tab
@@ -337,6 +359,10 @@ export default function SuperAdminPortal() {
               <span className="text-xs font-mono text-white/80 truncate block mt-0.5">
                 abhighodke5123@admin
               </span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#91A99B] mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Single Device Locked
+              </span>
               {lastSaved && (
                 <span className="text-[10px] font-mono text-white/40 block mt-2">
                   Last Sync: {new Date(lastSaved).toLocaleTimeString()}
@@ -431,6 +457,45 @@ export default function SuperAdminPortal() {
                     Edit Healthcare →
                   </button>
                 </div>
+              </div>
+
+              {/* Single Device Clearance Status */}
+              <div className="p-4 bg-white/[0.03] border border-white/10 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-mono uppercase tracking-wider text-[#91A99B]">
+                      Single-Device Lock: Active & Enforced
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/70">
+                    Exclusive Terminal: <span className="text-white font-medium">{activeDevice?.deviceName || 'Authorized Terminal'}</span>
+                    {activeDevice?.ipAddress ? ` • IP: ${activeDevice.ipAddress}` : ''}
+                  </p>
+                  <p className="text-[11px] text-white/40">
+                    All other browsers and devices are strictly locked out server-side via Supabase.
+                  </p>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (window.confirm('Terminate all sessions across all devices and re-register this device as the sole Super Admin?')) {
+                      await fetch('/api/admin/auth/recovery', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          username: 'abhighodke5123@admin',
+                          password: 'Aarti@1256',
+                          deviceId: localStorage.getItem('aveniq_admin_device_id') || `dev_${Date.now()}`,
+                        }),
+                      });
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-3 py-1.5 border border-white/20 text-xs font-mono text-white/80 hover:text-white hover:bg-white/10 rounded transition-colors shrink-0 cursor-pointer"
+                >
+                  Reset & Re-authorize Device
+                </button>
               </div>
 
               {/* Quick Action Banner */}
