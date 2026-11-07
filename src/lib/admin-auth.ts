@@ -157,9 +157,9 @@ export async function createSingleDeviceAdminSession(options: {
       };
     }
 
-    // 3. Atomically invalidate ALL previous active sessions for this account in Supabase
-    Promise.resolve(
-      supabase
+    // 3. Invalidate ALL previous active sessions for this account in Supabase BEFORE creating new one
+    try {
+      await supabase
         .from('admin_active_session')
         .update({
           is_active: false,
@@ -167,8 +167,10 @@ export async function createSingleDeviceAdminSession(options: {
           invalidation_reason: `Session superseded by login from device: ${deviceName} (${ipAddress})`,
         })
         .eq('username', SUPER_ADMIN_USERNAME)
-        .eq('is_active', true)
-    ).catch(() => {});
+        .eq('is_active', true);
+    } catch (invalErr) {
+      console.warn('Previous session invalidation warning:', invalErr);
+    }
 
     // 4. Generate unique cryptographically signed session token
     const nonce = crypto.randomUUID().replace(/-/g, '');
@@ -256,26 +258,10 @@ export async function checkAdminAuth(): Promise<AdminAuthCheckResult> {
 
     if (dbErr) {
       console.warn('Supabase session check error:', dbErr.message);
-      // Fallback to active memory session lock if schema is syncing
-      if (activeSessionLock && activeSessionLock.sessionId === token) {
-        return {
-          authenticated: true,
-          code: 'VALID',
-          activeDevice: activeSessionLock,
-        };
-      }
       return { authenticated: false, code: 'DB_UNAVAILABLE', reason: 'Unable to verify session with database.' };
     }
 
     if (!sessionRows || sessionRows.length === 0) {
-      // Check in-memory lock
-      if (activeSessionLock && activeSessionLock.sessionId === token) {
-        return {
-          authenticated: true,
-          code: 'VALID',
-          activeDevice: activeSessionLock,
-        };
-      }
       return {
         authenticated: false,
         code: 'SESSION_TERMINATED',
@@ -338,7 +324,6 @@ export async function invalidateCurrentAdminSession(): Promise<void> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-    activeSessionLock = null;
     if (token) {
       await supabase
         .from('admin_active_session')
@@ -355,10 +340,9 @@ export async function invalidateCurrentAdminSession(): Promise<void> {
 }
 
 /**
- * Terminate all active sessions across all devices (Emergency Master Reset).
+ * Emergency recovery: Terminate all sessions for the super admin account.
  */
-export async function terminateAllAdminSessions(reason = 'Emergency Master Clearance Reset'): Promise<void> {
-  activeSessionLock = null;
+export async function terminateAllAdminSessions(reason = 'Emergency device recovery reset'): Promise<void> {
   await supabase
     .from('admin_active_session')
     .update({
