@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { MedicalSpecialisationJsonLd } from '@/components/JsonLd';
 import {
-  Heart,
   Calendar,
   Users,
   ShieldCheck,
@@ -15,12 +14,11 @@ import {
   MapPin,
   MessageCircle,
   FileText,
-  Activity,
   ArrowRight,
   CheckCircle2,
   Stethoscope,
 } from 'lucide-react';
-import { fadeInUp, staggerContainer, viewportConfig } from '@/lib/animations';
+import { fadeInUp, staggerContainer } from '@/lib/animations';
 import { clinicalDepartments } from '@/data/catalog';
 import type { ClinicalDepartment } from '@/types';
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, Loader2, ArrowRight, Layers, CheckCircle2, Cpu, Copy, Check } from 'lucide-react';
+import { Sparkles, Loader2, ArrowRight, CheckCircle2, Cpu, Copy, Check } from 'lucide-react';
 import type { ScopingAnalysis } from '@/lib/gemini';
 
 export default function AiStudioScoper() {

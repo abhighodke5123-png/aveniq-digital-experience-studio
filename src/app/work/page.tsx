@@ -8,14 +8,10 @@ import Footer from '@/components/Footer';
 import {
   ArrowUpRight,
   Filter,
-  CheckCircle2,
-  ExternalLink,
-  Code2,
   Layers,
-  Sparkles,
   X,
 } from 'lucide-react';
-import { fadeInUp, staggerContainer, viewportConfig } from '@/lib/animations';
+import { staggerContainer } from '@/lib/animations';
 import { portfolioProjects } from '@/data/catalog';
 import type { DetailedProject } from '@/types';
 

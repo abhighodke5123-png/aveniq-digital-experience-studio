@@ -4,18 +4,8 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import {
-  Compass,
-  Code2,
-  CheckCircle2,
-  MapPin,
-  Clock,
-  Sparkles,
-  ArrowRight,
-  Shield,
-  Layers,
-} from 'lucide-react';
-import { fadeInUp, staggerContainer, viewportConfig } from '@/lib/animations';
+import { MapPin } from 'lucide-react';
+import { staggerContainer } from '@/lib/animations';
 
 const globalPresence = [
   { country: 'India', role: 'Engineering & Creative Studio HQ', timezone: 'IST (UTC+5:30)' },

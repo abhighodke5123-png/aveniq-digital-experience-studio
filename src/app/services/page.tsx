@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { fadeInUp, staggerContainer, viewportConfig } from '@/lib/animations';
+import { fadeInUp, staggerContainer } from '@/lib/animations';
 import { serviceCatalog } from '@/data/catalog';
 
 const serviceIcons: Record<string, typeof Globe> = {
