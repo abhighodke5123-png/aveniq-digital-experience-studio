@@ -169,12 +169,24 @@ export default async function ClientPortal() {
               <span className="font-medium text-[#17191D]">AVENIQ Core Systems</span>
             </div>
             <div className="p-4 bg-[#F7F6F2] border border-[#E5E2DC]">
-              <span className="text-[#777873] block mb-1">Direct Line</span>
-              <span className="font-medium text-[#17191D]">hello@aveniq.in</span>
+              <span className="text-[#777873] block mb-1">Direct Phone Line</span>
+              <a
+                href="tel:+919226638440"
+                className="font-medium text-[#17191D] hover:text-[#91A99B] transition-colors"
+              >
+                +91 9226638440
+              </a>
             </div>
             <div className="p-4 bg-[#F7F6F2] border border-[#E5E2DC]">
               <span className="text-[#777873] block mb-1">WhatsApp Studio Desk</span>
-              <span className="font-medium text-[#91A99B]">Priority Channel Active</span>
+              <a
+                href="https://wa.me/919226638440?text=Hello%20AVENIQ%20Studio%2C%20client%20portal%20inquiry"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#91A99B] hover:underline"
+              >
+                +91 9226638440 (Priority)
+              </a>
             </div>
           </div>
         </div>

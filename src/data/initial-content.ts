@@ -46,9 +46,9 @@ export const initialWebsiteContent: WebsiteContent = {
   faqs: clientFaqs,
   contact: {
     email: 'hello@aveniq.in',
-    phone: '+91 91754 00000',
+    phone: '+91 9226638440',
     address: 'Studio HQ — Digital Experience Architecture, Global Delivery (IN / US / UK)',
-    whatsappNotice: 'WhatsApp Priority Line Active for Direct Scoping',
+    whatsappNotice: 'WhatsApp Priority Line Active (+91 9226638440)',
     statusBadge: 'Q2 2026 Studio Slots Open',
   },
 };

@@ -62,7 +62,7 @@ const jsonLd = {
   "image": "https://aveniq.in/og-image.jpg",
   "description": "AVENIQ helps ambitious businesses transform their digital presence through premium website design, high-performance development, intelligent automation, SEO and complete digital growth solutions.",
   "url": "https://aveniq.in",
-  "telephone": "+91XXXXXXXXXX",
+  "telephone": "+91 9226638440",
   "email": "hello@aveniq.in",
   "address": {
     "@type": "PostalAddress",

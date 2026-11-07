@@ -40,6 +40,7 @@ export default function ContactSection() {
     const form = e.currentTarget;
     const data = new FormData(form);
 
+    // Honeypot spam check
     if (data.get('_hp')) return;
 
     const email = (data.get('email') as string)?.trim();
@@ -88,6 +89,7 @@ export default function ContactSection() {
 
   return (
     <>
+      {/* ═══════ FINAL CTA ═══════ */}
       <section className="bg-[#17191D] py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <motion.div
@@ -132,6 +134,7 @@ export default function ContactSection() {
         </div>
       </section>
 
+      {/* ═══════ CONTACT FORM ═══════ */}
       <section id="contact" className="py-24 lg:py-32 scroll-mt-16">
         <div className="max-w-3xl mx-auto px-6 lg:px-8">
           <motion.div
@@ -167,6 +170,7 @@ export default function ContactSection() {
               Fill in the details below. We typically review project scopes and respond within 24 hours.
             </motion.p>
 
+            {/* Success state */}
             {status === 'success' && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -194,7 +198,7 @@ export default function ContactSection() {
                     <button
                       type="button"
                       onClick={() => setStatus('idle')}
-                      className="mt-4 text-xs font-medium uppercase tracking-wider text-foreground hover:text-accent transition-colors underline cursor-pointer"
+                      className="mt-4 text-xs font-medium uppercase tracking-wider text-foreground hover:text-accent transition-colors underline"
                     >
                       Submit Another Enquiry
                     </button>
@@ -203,6 +207,7 @@ export default function ContactSection() {
               </motion.div>
             )}
 
+            {/* Error state */}
             {status === 'error' && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
@@ -223,6 +228,7 @@ export default function ContactSection() {
                 className="space-y-6"
                 noValidate
               >
+                {/* Honeypot — hidden from users for spam protection */}
                 <input
                   type="text"
                   name="_hp"
@@ -232,6 +238,7 @@ export default function ContactSection() {
                   aria-hidden="true"
                 />
 
+                {/* Row: Name + Business */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2 text-foreground">
@@ -260,6 +267,7 @@ export default function ContactSection() {
                   </div>
                 </div>
 
+                {/* Row: Email + Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
@@ -292,11 +300,12 @@ export default function ContactSection() {
                       name="phone"
                       type="tel"
                       className="w-full border border-border bg-transparent px-4 py-3.5 text-sm text-foreground placeholder:text-secondary/50 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
-                      placeholder="+91 98765 43210 / +1 (555) 019-2834"
+                      placeholder="+91 9226638440 / +1 (555) 019-2834"
                     />
                   </div>
                 </div>
 
+                {/* Row: Country + Service */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="country" className="block text-sm font-medium mb-2 text-foreground">
@@ -339,6 +348,7 @@ export default function ContactSection() {
                   </div>
                 </div>
 
+                {/* Description */}
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium mb-2 text-foreground">
                     Project Description
@@ -352,11 +362,12 @@ export default function ContactSection() {
                   />
                 </div>
 
+                {/* Submit button & notes */}
                 <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="inline-flex items-center justify-center bg-foreground text-background px-9 py-4 text-sm font-medium transition-colors duration-300 hover:bg-accent disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground min-h-[52px] cursor-pointer"
+                    className="inline-flex items-center justify-center bg-foreground text-background px-9 py-4 text-sm font-medium transition-colors duration-300 hover:bg-accent disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground min-h-[52px]"
                   >
                     {status === 'loading' ? (
                       <>
