@@ -1,15 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Production Supabase Project (pikgvqzvainywbfdlusv)
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pikgvqzvainywbfdlusv.supabase.co';
-const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+const VERIFIED_SUPABASE_URL = 'https://pikgvqzvainywbfdlusv.supabase.co';
+const VERIFIED_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpa2d2cXp2YWlueXdiZmRsdXN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MTYzMzAsImV4cCI6MjEwOTM5MjMzMH0.iBEAIKS3pEER10n70U8FpmCFzAI9IRaOCclCtZA51DY';
 
+function getValidAnonKey(): string {
+  const envKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!envKey) return VERIFIED_ANON_KEY;
+  try {
+    const parts = envKey.split('.');
+    if (parts.length >= 2) {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+      if (payload.ref === 'pikgvqzvainywbfdlusv') {
+        return envKey;
+      }
+    }
+  } catch {
+    // Fallback to verified key if parsing fails
+  }
+  return VERIFIED_ANON_KEY;
+}
+
 export const supabase = createClient(
-  SUPABASE_URL.includes('pikgvqzvainywbfdlusv') ? SUPABASE_URL : 'https://pikgvqzvainywbfdlusv.supabase.co',
-  SUPABASE_ANON_KEY,
+  VERIFIED_SUPABASE_URL,
+  getValidAnonKey(),
   {
     auth: {
       persistSession: false,
