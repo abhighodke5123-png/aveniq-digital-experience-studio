@@ -22,8 +22,19 @@ import {
   Plus,
   Trash2,
   Check,
+  Smartphone,
+  Tablet,
+  Monitor,
+  PhoneCall,
+  MessageSquare,
+  Copy,
+  X,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useSiteContent } from '@/context/SiteContentContext';
+import { triggerConfettiBurst } from '@/lib/confetti';
+import { sound } from '@/lib/sound-fx';
 import type { ServiceDetail, DetailedProject, ClinicalDepartment, FaqItem } from '@/types';
 import type { WebsiteContent } from '@/types/content';
 
@@ -75,6 +86,27 @@ export default function SuperAdminPortal() {
     createdAt?: string;
     lastActiveAt?: string;
   } | null>(null);
+
+  // Interactive Live Device Viewport Simulator state
+  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop' | null>(null);
+  const [soundActive, setSoundActive] = useState(false);
+  const [copiedLeadId, setCopiedLeadId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSoundActive(sound.isEnabled());
+  }, []);
+
+  // Keyboard shortcut Ctrl+S / Cmd+S for rapid publishing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [formData]);
 
   // Sync content into formData when context finishes loading or changes
   useEffect(() => {
@@ -158,7 +190,9 @@ export default function SuperAdminPortal() {
     const result = await updateContent(formData);
     if (result.success) {
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 4000);
+      triggerConfettiBurst(0.5, 0.22);
+      sound.playSuccess();
+      setTimeout(() => setSaveSuccess(false), 4500);
     } else {
       setSaveError(result.error || 'Failed to save updates to server.');
     }
@@ -218,6 +252,35 @@ export default function SuperAdminPortal() {
 
           {/* Action buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Live Device Viewport Simulator Button */}
+            <button
+              onClick={() => {
+                sound.playClick();
+                setPreviewDevice('mobile');
+              }}
+              title="Open Interactive Viewport Simulator"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 transition-colors cursor-pointer"
+            >
+              <Smartphone size={13} className="text-[#91A99B]" />
+              <span className="hidden sm:inline">Device Simulator</span>
+            </button>
+
+            {/* Tactile Audio Toggle */}
+            <button
+              onClick={() => {
+                const state = sound.toggle();
+                setSoundActive(state);
+              }}
+              title={soundActive ? 'Mute Studio Audio FX' : 'Enable Studio Audio FX'}
+              className={`p-1.5 rounded border transition-colors cursor-pointer ${
+                soundActive
+                  ? 'bg-[#91A99B]/20 border-[#91A99B]/40 text-[#91A99B]'
+                  : 'border-white/10 text-white/40 hover:text-white'
+              }`}
+            >
+              {soundActive ? <Volume2 size={14} /> : <VolumeX size={14} />}
+            </button>
+
             <Link
               href="/"
               target="_blank"
@@ -241,7 +304,8 @@ export default function SuperAdminPortal() {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[#91A99B] text-[#111215] text-xs font-semibold hover:bg-[#A5B5AA] transition-all cursor-pointer shadow-sm"
+              title="Publish live to Supabase & edge (Ctrl+S)"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded bg-[#91A99B] text-[#111215] text-xs font-semibold hover:bg-[#A5B5AA] transition-all cursor-pointer shadow-sm active:scale-95"
             >
               {isSaving ? (
                 <>
@@ -252,6 +316,7 @@ export default function SuperAdminPortal() {
                 <>
                   <Save size={13} />
                   <span>Save & Publish Live</span>
+                  <span className="hidden lg:inline text-[10px] font-mono opacity-60">⌘S</span>
                 </>
               )}
             </button>
@@ -1511,21 +1576,74 @@ export default function SuperAdminPortal() {
                           </span>
                         </div>
 
-                        {/* Status Selector */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-white/50">Status:</span>
-                          <select
-                            value={lead.status}
-                            onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                            className="bg-[#111215] border border-white/20 text-xs rounded px-2.5 py-1 text-white focus:outline-none focus:border-[#91A99B]"
+                        {/* Status Selector & Fast Actions */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {lead.phone && (
+                            <>
+                              <a
+                                href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                                  `Hello ${lead.full_name}, thank you for contacting AVENIQ Digital Experience Studio regarding ${lead.interested_service || 'your project'}.`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Chat on WhatsApp"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-mono hover:bg-emerald-500/30 transition-colors"
+                              >
+                                <MessageSquare size={12} />
+                                <span>WhatsApp</span>
+                              </a>
+                              <a
+                                href={`tel:${lead.phone}`}
+                                title="Call Contact"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-white/10 text-white/80 hover:text-white border border-white/15 text-xs font-mono transition-colors"
+                              >
+                                <PhoneCall size={12} />
+                                <span>Call</span>
+                              </a>
+                            </>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              sound.playClick();
+                              navigator.clipboard.writeText(lead.email);
+                              setCopiedLeadId(lead.id);
+                              setTimeout(() => setCopiedLeadId(null), 2000);
+                            }}
+                            title="Copy Email Address"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 text-xs font-mono transition-colors cursor-pointer"
                           >
-                            <option value="New">New</option>
-                            <option value="Contacted">Contacted</option>
-                            <option value="Qualified">Qualified</option>
-                            <option value="Proposal Sent">Proposal Sent</option>
-                            <option value="Converted">Converted</option>
-                            <option value="Closed">Closed</option>
-                          </select>
+                            {copiedLeadId === lead.id ? (
+                              <>
+                                <Check size={12} className="text-emerald-400" />
+                                <span className="text-emerald-400">Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={12} />
+                                <span>Copy Email</span>
+                              </>
+                            )}
+                          </button>
+
+                          <div className="flex items-center gap-1.5 ml-1">
+                            <span className="text-xs font-mono text-white/50">Status:</span>
+                            <select
+                              value={lead.status}
+                              onChange={(e) => {
+                                sound.playClick();
+                                updateLeadStatus(lead.id, e.target.value);
+                              }}
+                              className="bg-[#111215] border border-white/20 text-xs rounded px-2.5 py-1 text-white focus:outline-none focus:border-[#91A99B]"
+                            >
+                              <option value="New">New</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="Qualified">Qualified</option>
+                              <option value="Proposal Sent">Proposal Sent</option>
+                              <option value="Converted">Converted</option>
+                              <option value="Closed">Closed</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
 
@@ -1568,6 +1686,104 @@ export default function SuperAdminPortal() {
           )}
         </main>
       </div>
+
+      {/* ── Interactive Live Device Viewport Simulator Modal ── */}
+      {previewDevice && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4">
+          <div className="w-full max-w-5xl flex items-center justify-between pb-3 text-white border-b border-white/10 mb-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#91A99B] font-semibold">
+                Live Viewport Simulator
+              </span>
+              <div className="flex items-center gap-1 bg-white/10 p-1 rounded">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setPreviewDevice('mobile');
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    previewDevice === 'mobile'
+                      ? 'bg-[#91A99B] text-[#111215] font-semibold'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Smartphone size={13} />
+                  <span>Mobile (375px)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setPreviewDevice('tablet');
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    previewDevice === 'tablet'
+                      ? 'bg-[#91A99B] text-[#111215] font-semibold'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Tablet size={13} />
+                  <span>Tablet (768px)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    setPreviewDevice('desktop');
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    previewDevice === 'desktop'
+                      ? 'bg-[#91A99B] text-[#111215] font-semibold'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Monitor size={13} />
+                  <span>Desktop</span>
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                sound.playClick();
+                setPreviewDevice(null);
+              }}
+              className="p-1.5 text-white/60 hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          <div
+            className={`transition-all duration-300 rounded-xl overflow-hidden border-2 border-white/20 bg-black shadow-2xl flex flex-col ${
+              previewDevice === 'mobile'
+                ? 'w-[375px] h-[680px]'
+                : previewDevice === 'tablet'
+                ? 'w-[768px] h-[780px]'
+                : 'w-full max-w-5xl h-[78vh]'
+            }`}
+          >
+            <div className="bg-[#17191D] px-4 py-2 flex items-center justify-between border-b border-white/10 text-white/50 text-[11px] font-mono">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              </div>
+              <span className="text-white/80">https://aveniq.in</span>
+              <span>
+                {previewDevice === 'mobile'
+                  ? '375 × 667 (Mobile)'
+                  : previewDevice === 'tablet'
+                  ? '768 × 1024 (Tablet)'
+                  : 'Fluid Desktop'}
+              </span>
+            </div>
+            <iframe
+              src="/"
+              title="Interactive Live Site Simulator"
+              className="w-full flex-1 border-0 bg-background"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
