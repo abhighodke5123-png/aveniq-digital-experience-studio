@@ -20,9 +20,12 @@ function InteractiveArchitecturalComposition() {
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 480);
     const y = Math.round(((e.clientY - rect.top) / rect.height) * 560);
-    setCoords({ x, y });
+    if (!isNaN(x) && !isNaN(y)) {
+      setCoords({ x, y });
+    }
   };
 
   return (
@@ -100,76 +103,56 @@ function InteractiveArchitecturalComposition() {
           onMouseLeave={() => setHoveredNode(null)}
         />
 
-        {/* Small square — foreground */}
-        <rect x="100" y="140" width="80" height="80" fill="#17191D" opacity="0.08" />
-
-        {/* Circle — accent outline */}
-        <circle
-          cx="400"
-          cy="120"
-          r="60"
-          stroke="#91A99B"
-          strokeWidth="1.5"
-          fill="none"
-          className="transition-all duration-500 hover:stroke-[2.5]"
-          onMouseEnter={() => setHoveredNode('RADIAL_ORBIT')}
-          onMouseLeave={() => setHoveredNode(null)}
-        />
-
-        {/* Small filled circle */}
-        <circle cx="400" cy="120" r="8" fill="#91A99B" />
-
-        {/* Vertical line */}
-        <line x1="420" y1="200" x2="420" y2="520" stroke="#E5E2DC" strokeWidth="1" />
-
-        {/* Horizontal line — lower */}
-        <line x1="40" y1="440" x2="460" y2="440" stroke="#E5E2DC" strokeWidth="1" />
-
-        {/* Diagonal accent line */}
-        <line x1="320" y1="300" x2="460" y2="380" stroke="#91A99B" strokeWidth="1" opacity="0.6" />
-
-        {/* Small square cluster — bottom right */}
-        <rect x="380" y="460" width="40" height="40" fill="#17191D" opacity="0.06" />
-        <rect x="430" y="460" width="40" height="40" stroke="#E5E2DC" strokeWidth="1" fill="none" />
-
-        {/* Thin horizontal bar — top */}
-        <rect x="60" y="60" width="120" height="2" fill="#91A99B" />
-
-        {/* Small accent dot — bottom left */}
-        <circle cx="80" cy="500" r="4" fill="#91A99B" opacity="0.5" />
-
-        {/* Architectural crosshair lines */}
-        <line x1="280" y1="480" x2="280" y2="540" stroke="#E5E2DC" strokeWidth="1" />
-        <line x1="250" y1="510" x2="310" y2="510" stroke="#E5E2DC" strokeWidth="1" />
-
-        {/* Dynamic crosshair tracking mouse */}
-        <line
-          x1={coords.x - 12}
-          y1={coords.y}
-          x2={coords.x + 12}
-          y2={coords.y}
-          stroke="#91A99B"
-          strokeWidth="1.5"
-          opacity="0.75"
-        />
+        {/* Dynamic Interactive Reticle & Crosshair */}
         <line
           x1={coords.x}
-          y1={coords.y - 12}
+          y1="0"
           x2={coords.x}
-          y2={coords.y + 12}
+          y2="560"
           stroke="#91A99B"
-          strokeWidth="1.5"
-          opacity="0.75"
+          strokeWidth="1"
+          strokeDasharray="4 4"
+          opacity="0.4"
+        />
+        <line
+          x1="0"
+          y1={coords.y}
+          x2="480"
+          y2={coords.y}
+          stroke="#91A99B"
+          strokeWidth="1"
+          strokeDasharray="4 4"
+          opacity="0.4"
         />
         <circle
           cx={coords.x}
           cy={coords.y}
-          r="4"
+          r="6"
           stroke="#91A99B"
-          strokeWidth="1"
+          strokeWidth="1.5"
           fill="none"
-          opacity="0.8"
+          className="animate-ping"
+          style={{ transformOrigin: `${coords.x}px ${coords.y}px`, animationDuration: '2.5s' }}
         />
+        <circle cx={coords.x} cy={coords.y} r="2.5" fill="#91A99B" />
+
+        {/* Architectural measurement callout */}
+        <text
+          x={Math.min(Math.max(coords.x + 10, 15), 380)}
+          y={Math.max(coords.y - 10, 25)}
+          fill="#91A99B"
+          fontSize="10"
+          fontFamily="monospace"
+          opacity="0.85"
+        >
+          [{coords.x}, {coords.y}]
+        </text>
+
+        {/* Decorative corner brackets */}
+        <path d="M 10 20 L 10 10 L 20 10" stroke="#91A99B" strokeWidth="1" opacity="0.6" />
+        <path d="M 470 20 L 470 10 L 460 10" stroke="#91A99B" strokeWidth="1" opacity="0.6" />
+        <path d="M 10 540 L 10 550 L 20 550" stroke="#91A99B" strokeWidth="1" opacity="0.6" />
+        <path d="M 470 540 L 470 550 L 460 550" stroke="#91A99B" strokeWidth="1" opacity="0.6" />
       </svg>
     </div>
   );
@@ -177,82 +160,92 @@ function InteractiveArchitecturalComposition() {
 
 export default function Hero() {
   const { content } = useSiteContent();
-  const hero = content.hero;
+  const heroData = content.hero;
 
   return (
-    <section
-      id="home"
-      className="relative min-h-[90vh] flex items-center overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28"
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 gap-16">
-          {/* Left — Content (55-60%) */}
+    <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-32 lg:pt-40 lg:pb-36">
+      {/* Background architectural grid — subtle */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, currentColor 1px, transparent 1px),
+            linear-gradient(to bottom, currentColor 1px, transparent 1px)
+          `,
+          backgroundSize: '80px 80px',
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="relative mx-auto max-w-7xl px-5 md:px-8">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* ── Left Column: Typography & CTAs (7 cols) ── */}
           <motion.div
-            className="lg:w-[58%] flex flex-col gap-8"
             variants={staggerContainer}
             initial="hidden"
-            whileInView="visible"
-            viewport={viewportConfig}
+            animate="visible"
+            className="lg:col-span-7"
           >
             {/* Eyebrow */}
-            <motion.p
-              variants={fadeInUp}
-              className="text-xs uppercase tracking-[0.2em] text-secondary"
-            >
-              {hero.eyebrow}
-            </motion.p>
+            <motion.div variants={fadeInUp}>
+              <span className="inline-flex items-center gap-2 border border-border px-3 py-1 text-xs font-mono uppercase tracking-[0.2em] text-secondary">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                {heroData.eyebrow}
+              </span>
+            </motion.div>
 
-            {/* Headline */}
+            {/* Main Headline */}
             <motion.h1
               variants={fadeInUp}
-              className="font-heading text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium leading-tight text-foreground max-w-4xl"
+              className="mt-6 font-heading text-4xl font-normal leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
             >
-              {hero.headline}
+              {heroData.headline}
             </motion.h1>
 
-            {/* Description */}
+            {/* Subtitle */}
             <motion.p
               variants={fadeInUp}
-              className="text-lg text-secondary max-w-xl"
+              className="mt-6 max-w-xl text-base leading-relaxed text-secondary sm:text-lg md:text-xl font-normal"
             >
-              {hero.description}
+              {heroData.description}
             </motion.p>
 
             {/* CTAs */}
             <motion.div
               variants={fadeInUp}
-              className="flex flex-wrap gap-4 pt-2"
+              className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center"
             >
               <Link
-                href={hero.primaryCtaHref || '/contact'}
-                className="inline-flex items-center bg-foreground text-background px-8 py-4 text-sm font-medium transition-colors duration-300 hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                href={heroData.primaryCtaHref}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-4 font-body text-sm font-medium text-background transition-colors duration-200 hover:bg-accent focus-visible:outline-accent"
               >
-                {hero.primaryCtaText || 'Start a Project ↗'}
+                <span>{heroData.primaryCtaText}</span>
+                <span aria-hidden="true">&rarr;</span>
               </Link>
               <Link
-                href={hero.secondaryCtaHref || '/work'}
-                className="inline-flex items-center border border-border text-foreground px-8 py-4 text-sm font-medium transition-colors duration-300 hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                href={heroData.secondaryCtaHref}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-8 py-4 font-body text-sm font-medium text-foreground transition-colors duration-200 hover:border-foreground focus-visible:outline-accent"
               >
-                {hero.secondaryCtaText || 'Explore Our Work ↓'}
+                <span>{heroData.secondaryCtaText}</span>
               </Link>
             </motion.div>
 
-            {/* Bottom descriptor */}
-            <motion.p
+            {/* Bottom Descriptor */}
+            <motion.div
               variants={fadeInUp}
-              className="text-xs uppercase tracking-[0.15em] text-secondary pt-8"
+              className="mt-12 flex items-center gap-3 border-t border-border pt-6 text-xs font-mono uppercase tracking-wider text-secondary"
             >
-              {hero.bottomDescriptor}
-            </motion.p>
+              <span className="text-accent">&#9670;</span>
+              <span>{heroData.bottomDescriptor}</span>
+            </motion.div>
           </motion.div>
 
-          {/* Right — Architectural Visual (40-45%) */}
+          {/* ── Right Column: Interactive Geometric Composition (5 cols) ── */}
           <motion.div
-            className="lg:w-[42%] flex items-center justify-center"
             variants={slideInRight}
             initial="hidden"
-            whileInView="visible"
-            viewport={viewportConfig}
+            animate="visible"
+            className="flex items-center justify-center lg:col-span-5"
           >
             <InteractiveArchitecturalComposition />
           </motion.div>

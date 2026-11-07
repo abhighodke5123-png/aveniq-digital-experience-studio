@@ -10,24 +10,28 @@ export default function InteractiveSpotlight() {
   const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    // Check if device supports fine hover pointer
-    const hasPointer = window.matchMedia('(pointer: fine)').matches;
-    if (!hasPointer) return;
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    try {
+      const hasPointer = window.matchMedia('(pointer: fine)').matches;
+      if (!hasPointer) return;
 
-    let rafId: number;
+      let rafId: number;
 
-    const handlePointerMove = (e: MouseEvent) => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        setCoords({ x: e.clientX, y: e.clientY });
-      });
-    };
+      const handlePointerMove = (e: MouseEvent) => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setCoords({ x: e.clientX, y: e.clientY });
+        });
+      };
 
-    window.addEventListener('mousemove', handlePointerMove, { passive: true });
-    return () => {
-      window.removeEventListener('mousemove', handlePointerMove);
-      cancelAnimationFrame(rafId);
-    };
+      window.addEventListener('mousemove', handlePointerMove, { passive: true });
+      return () => {
+        window.removeEventListener('mousemove', handlePointerMove);
+        cancelAnimationFrame(rafId);
+      };
+    } catch {
+      // Graceful fallback for browsers without matchMedia pointer support
+    }
   }, []);
 
   if (!coords) return null;

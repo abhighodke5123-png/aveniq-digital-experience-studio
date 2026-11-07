@@ -6,8 +6,12 @@ class SoundFX {
 
   constructor() {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('aveniq_sound_enabled');
-      this.enabled = stored === 'true';
+      try {
+        const stored = localStorage.getItem('aveniq_sound_enabled');
+        this.enabled = stored === 'true';
+      } catch {
+        this.enabled = false;
+      }
     }
   }
 
@@ -30,7 +34,11 @@ class SoundFX {
   public setEnabled(enable: boolean) {
     this.enabled = enable;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('aveniq_sound_enabled', enable ? 'true' : 'false');
+      try {
+        localStorage.setItem('aveniq_sound_enabled', enable ? 'true' : 'false');
+      } catch {
+        // Storage policy fallback for strict privacy mode
+      }
     }
     if (enable) {
       this.playSwitch();
