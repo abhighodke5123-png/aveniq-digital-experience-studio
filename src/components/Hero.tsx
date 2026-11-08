@@ -19,6 +19,7 @@ import {
   Compass,
 } from 'lucide-react';
 import { useSiteContent } from '@/context/SiteContentContext';
+import { initialWebsiteContent } from '@/data/initial-content';
 import { fadeInUp, slideInRight, staggerContainer, viewportConfig } from '@/lib/animations';
 import { sound } from '@/lib/sound-fx';
 
@@ -40,7 +41,7 @@ const SAMPLE_DOCTORS: DoctorSlot[] = [
 
 export default function Hero() {
   const { content } = useSiteContent();
-  const hero = content.hero;
+  const hero = content?.hero || initialWebsiteContent.hero;
 
   const [activeMode, setActiveMode] = useState<CanvasMode>('clinical');
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 240, y: 180 });
