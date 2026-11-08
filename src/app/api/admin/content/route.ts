@@ -7,10 +7,32 @@ import type { WebsiteContent } from '@/types/content';
 // In-memory runtime cache for high-speed edge delivery
 let runtimeContentCache: WebsiteContent | null = null;
 
+function sanitizeContent(raw: unknown): WebsiteContent | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const candidate = raw as Partial<WebsiteContent>;
+  if (!candidate.hero || typeof candidate.hero !== 'object' || !candidate.hero.eyebrow) {
+    return null;
+  }
+  return {
+    ...initialWebsiteContent,
+    ...candidate,
+    hero: { ...initialWebsiteContent.hero, ...(candidate.hero || {}) },
+    introduction: { ...initialWebsiteContent.introduction, ...(candidate.introduction || {}) },
+    healthcare: { ...initialWebsiteContent.healthcare, ...(candidate.healthcare || {}) },
+    contact: { ...initialWebsiteContent.contact, ...(candidate.contact || {}) },
+    services: candidate.services && candidate.services.length > 0 ? candidate.services : initialWebsiteContent.services,
+    projects: candidate.projects && candidate.projects.length > 0 ? candidate.projects : initialWebsiteContent.projects,
+    faqs: candidate.faqs && candidate.faqs.length > 0 ? candidate.faqs : initialWebsiteContent.faqs,
+  };
+}
+
 export async function GET() {
   try {
     if (runtimeContentCache) {
-      return NextResponse.json({ success: true, content: runtimeContentCache, source: 'cache' });
+      const sanitized = sanitizeContent(runtimeContentCache);
+      if (sanitized) {
+        return NextResponse.json({ success: true, content: sanitized, source: 'cache' });
+      }
     }
 
     const { data, error } = await supabase
@@ -20,10 +42,14 @@ export async function GET() {
       .limit(1);
 
     if (!error && data && data.length > 0 && data[0].content_json) {
-      runtimeContentCache = data[0].content_json as WebsiteContent;
-      return NextResponse.json({ success: true, content: runtimeContentCache, source: 'database' });
+      const sanitized = sanitizeContent(data[0].content_json);
+      if (sanitized) {
+        runtimeContentCache = sanitized;
+        return NextResponse.json({ success: true, content: sanitized, source: 'database' });
+      }
     }
 
+    runtimeContentCache = initialWebsiteContent;
     return NextResponse.json({
       success: true,
       content: initialWebsiteContent,
@@ -33,7 +59,7 @@ export async function GET() {
     console.warn('API get content fallback note:', err);
     return NextResponse.json({
       success: true,
-      content: runtimeContentCache || initialWebsiteContent,
+      content: sanitizeContent(runtimeContentCache) || initialWebsiteContent,
       source: 'fallback',
     });
   }

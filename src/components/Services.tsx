@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Globe, Palette, TrendingUp, Bot, Server, ArrowUpRight, Sparkles } from 'lucide-react';
 import { staggerContainer, fadeInUp, viewportConfig } from '@/lib/animations';
 import { useSiteContent } from '@/context/SiteContentContext';
+import { initialWebsiteContent } from '@/data/initial-content';
 import type { LucideIcon } from 'lucide-react';
 import type { ServiceDetail } from '@/types';
 
@@ -18,7 +19,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 export default function Services() {
   const { content } = useSiteContent();
-  const services = content.services || [];
+  const services = content?.services || initialWebsiteContent.services || [];
 
   return (
     <section id="services" className="py-24 lg:py-32">

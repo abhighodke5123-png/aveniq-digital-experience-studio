@@ -12,6 +12,13 @@ export default function ErrorBoundary({
 }) {
   useEffect(() => {
     console.warn('Next.js client error boundary caught:', error);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('aveniq_website_content_v1');
+      }
+    } catch {
+      // Ignore in private storage
+    }
   }, [error]);
 
   return (

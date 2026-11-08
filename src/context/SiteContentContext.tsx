@@ -40,9 +40,12 @@ export function SiteContentProvider({ children }: { children: React.ReactNode })
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached && active) {
           const parsed = JSON.parse(cached);
-          if (parsed && parsed.hero) {
-            setContent(parsed);
+          if (parsed && parsed.hero && parsed.hero.eyebrow && parsed.introduction) {
+            setContent({ ...initialWebsiteContent, ...parsed });
             if (parsed.lastUpdated) setLastSaved(parsed.lastUpdated);
+          } else {
+            // Purge corrupted/empty cache
+            localStorage.removeItem(STORAGE_KEY);
           }
         }
       } catch (e) {
@@ -54,12 +57,22 @@ export function SiteContentProvider({ children }: { children: React.ReactNode })
         const res = await fetch('/api/admin/content');
         if (res.ok) {
           const data = await res.json();
-          if (data?.content && active) {
-            setContent(data.content);
+          if (data?.content && data.content.hero && data.content.hero.eyebrow && active) {
+            const merged: WebsiteContent = {
+              ...initialWebsiteContent,
+              ...data.content,
+              hero: { ...initialWebsiteContent.hero, ...(data.content.hero || {}) },
+              introduction: { ...initialWebsiteContent.introduction, ...(data.content.introduction || {}) },
+              healthcare: { ...initialWebsiteContent.healthcare, ...(data.content.healthcare || {}) },
+              contact: { ...initialWebsiteContent.contact, ...(data.content.contact || {}) },
+            };
+            setContent(merged);
             if (data.content.lastUpdated) {
               setLastSaved(data.content.lastUpdated);
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.content));
             }
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            } catch {}
           }
         }
       } catch (err) {
